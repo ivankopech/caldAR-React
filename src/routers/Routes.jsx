@@ -13,12 +13,12 @@ const Routes = () => {
           <Home />
         </Layout>
       </Route>
-      <Route exact path="/Boilers">
+      <Route exact path="/boilers">
         <Layout>
           <Boilers />
         </Layout>
       </Route>
-      <Route exact path="/Boilers/:action/:BoilersId?">
+      <Route exact path="/boilers/:action/:boilersId?">
         <Layout>
           <Boilers />
         </Layout>
