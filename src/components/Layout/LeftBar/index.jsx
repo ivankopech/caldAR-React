@@ -8,7 +8,7 @@ const LeftBar = () => {
     <div className={styles.leftbarContainer}>
       <ul>
         <NavLink className={styles.leftbarItem} to="/home">
-          Home
+          Boilers
         </NavLink>
       </ul>
     </div>
