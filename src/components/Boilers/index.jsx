@@ -16,7 +16,7 @@ function  Boilers() {
   });
 
   useEffect(() => {
-    const getBoiler = () => {
+    const getBoilers = () => {
         setBoilers(boilerData);
     };
 
@@ -68,7 +68,7 @@ function  Boilers() {
     const updatedBoilers = boiler.map((x) =>
       x.id === boiler.id ? boiler : x
     );
-    setBoilers(updateBoiler);
+    setBoilers(updatedBoilers);
     history.push('/boilers');
   });
 

@@ -18,7 +18,7 @@ const Routes = () => {
           <Boilers />
         </Layout>
       </Route>
-      <Route exact path="/boilers/:action/:boilersId?">
+      <Route exact path="/boilers/:action/:boilerId?">
         <Layout>
           <Boilers />
         </Layout>
