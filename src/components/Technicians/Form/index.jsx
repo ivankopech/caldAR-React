@@ -16,11 +16,6 @@ const TechnicianForm = ({
   const [DNI, setDNI] = useState('');
   const [phone, setPhone] = useState('');
   const [address, setAddress] = useState('');
-  // const options = [
-  //   { value: '', label: '' },
-  //   { value: 'particular', label: 'Particular' },
-  //   { value: 'construction company', label: 'Construction company' },
-  // ];
 
   const handleSubmit = (e) => {
     e.preventDefault();
