@@ -20,7 +20,7 @@ function  Boilers() {
         setBoilers(boilerData);
     };
 
-    getBoiler();
+    getBoilers();
   }, []);
 
   const getBoiler = (id) => {
