@@ -1,88 +1,67 @@
 import { useState, useEffect } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useParams } from 'react-router-dom';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import technicianData from '../../data/technician.json';
+import Modal from '../Shared/Modal';
 import TechnicianList from './List';
 import TechnicianForm from './Form';
 import styles from './technicians.module.css';
 import Technician from './Technician';
+import {
+  getTechnician as getTechnicianAction,
+  addTechnician as addTechnicianAction,
+  updateTechnician as updateTechnicianAction,
+  deleteTechnician as deleteTechnicianAction,
+} from '../../Redux/Actions/technicianActions';
 
-function Technicians() {
+const Technicians = ({
+  technicians,
+  getTechnician,
+  addTechnician,
+  updateTechnician,
+  deleteTechnician
+}) => {
   const history = useHistory();
-  const [technicians, setTechnicians] = useState([]);
+  const {action, buildingId} = useParams();
   const [update, setUpdate] = useState(false);
   const [currentTechnician, setCurrentTechnician] = useState({
-    id: null,
+    _id: null,
     fullName: '',
     DNI: '',
-    phone: '',
+    phone: '', 
     address: '',
-  });
-
-  useEffect(() => {
-    const getTechnicians = () => {
-        setTechnicians(technicianData);
-    };
-
-    getTechnicians();
-  }, []);
-
-  const getTechnician = (id) => {
-    return technicianData.find((b) => b.id === id);
-  };
-
-  const randomId = (array) => {
-    let actualPosition = array.length;
-    while (actualPosition !== 0) {
-      const randomPosition = Math.floor(Math.random() * actualPosition);
-      actualPosition -= 1;
-      [array[actualPosition], array[randomPosition]] = [
-        array[randomPosition],
-        array[actualPosition],
-      ];
-    }
-    return array;
-  };
-
-  const generateRandom = (amount) => {
-    const characters =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'.split(
-        ''
-      );
-    randomId(characters);
-    return characters.slice(0, amount).join('');
-  };
-
-  const addTechnician = (technician) => {
-    technician.id = generateRandom(24);
-    setTechnicians([...technicians, technician]);
-  };
+  }),
 
   const editTechnician = (technician) => {
     setUpdate(true);
-    history.push(`/technicians/update/${technician.id}`);
+    const id = technician._id;
+    history.push(`/technicians/update/${id}`);
     setCurrentTechnician({
-      id: technician.id,
+      _id: technician._id,
       fullName: technician.fullName,
       DNI: technician.DNI,
       phone: technician.phone,
       address: technician.address,
     });
-  };
+};
 
-  const updateTechnician = (technician) => {
-    setUpdate(false);
-    const updatedTechnicians = technician.map((x) =>
-      x.id === technician.id ? technician : x
-    );
-    setTechnicians(updatedTechnicians);
-    history.push('/technicians');
-  };
+const updateATechnician = (technician) => {
+  setUpdate(false);
+  updateTechnician(technician, technicianId);
+  history.push('/technicians');
+};
 
-  const deleteTechnician = (id) => {
-    setUpdate(false);
-    setTechnicians(technicians.filter((technician) => technician.id !== id));
-    history.replace('/technicians');
-  };
+const handleCancel = () => {
+  setUpdate(false);
+  history.push('/technicians');
+};
+
+const deleteATechnician = (technician) => {
+  deleteTechnician(technician);
+  history.replace('/technicians');
+};
+
 
   return (
     <div className={styles.container}>
@@ -92,26 +71,51 @@ function Technicians() {
           <TechnicianForm
             currentTechnician={currentTechnician}
             setUpdate={setUpdate}
-            updateTechnician={updateTechnician}
+            updateATechnician={updateATechnician}
           />
         </div>
       ) : (
         <div>
           <TechnicianForm
             onAdd={addTechnician}
-            setCurrentTechnician={setCurrentTechnician}
             setUpdate={setUpdate}
-            getTechnician={getTechnician}
           />
         </div>
       )}
+      {technicians.isLoading ? <h3>Loading</h3> : null}
       <TechnicianList
         technicians={technicians}
-        onDelete={deleteTechnician}
+        onDelete={(id) =>
+        getTechnician(id) && history.replace(`/technicians/delete/${id}`)
+      }
         editTechnician={editTechnician}
       />
+      {action === 'delete' && (
+        <Modal
+          onSubmit={() => deleteATechnician(technicianId)}
+          onClose={() => handleCancel()}
+          item="technician"
+        />
+      )}
     </div>
   );
-}
+};
 
-export default Technicians;
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(
+    {
+      getTechnician: getTechnicianAction,
+      addTechnician: addTechnicianAction,
+      updateTechnician: updateTechnicianAction,
+      deleteTechnician: deleteTechnicianAction,
+    },
+    dispatch
+  );
+};
+
+const mapStateToProps = (state) => ({
+  buildings: state.buildings,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Technicians);
+

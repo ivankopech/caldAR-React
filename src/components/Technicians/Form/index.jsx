@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
+import { connect, useSelector } from 'react-redux';
+import { bindActionCreators } from 'redux';
 import { useHistory, useParams } from 'react-router-dom';
 import styles from './form.module.css';
+import { getTechnicians as getTechnicianAction, getTechnicians } from '../../../Redux/Actions/technicianActions';
 
 const TechnicianForm = ({
   onAdd,
@@ -10,6 +13,7 @@ const TechnicianForm = ({
   setCurrentTechnician,
   getTechnician,
 }) => {
+  const constructions = useSelector((state) => state.constructions.list);
   const history = useHistory();
   const { action, technicianId } = useParams();
   const [fullName, setName] = useState('');
@@ -19,8 +23,11 @@ const TechnicianForm = ({
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (currentTechnician) {
+    if (type.length === 0) {
+      return;
+    }
+    
+    if (technician && action === 'update') {
       updateTechnician({
         fullName,
         DNI,
@@ -36,13 +43,16 @@ const TechnicianForm = ({
     setDNI('');
     setPhone('');
     setAddress('');
+
   };
 
   const handleReset = () => {
     if (currentTechnician) {
       setUpdate(false);
     }
-    history.push('/technicians');
+    if (action !== 'delete' || !technician){
+      history.push('/technicians');
+    }
     setName('');
     setDNI('');
     setPhone('');
@@ -50,30 +60,27 @@ const TechnicianForm = ({
   };
 
   useEffect(() => {
-    if (currentTechnician) {
-      setName(currentTechnician.fullName);
-      setDNI(currentTechnician.DNI);
-      setPhone(currentTechnician.phone);
-      setAddress(currentTechnician.address);
-    } else if (action === 'update') {
-      const TechnicianToBeUpdated = getTechnician(technicianId);
-      if (TechnicianToBeUpdated) {
-        setUpdate(true);
-        history.push(`/technician/update/${TechnicianToBeUpdated.id}`);
-        setCurrentTechnician({
-          id: TechnicianToBeUpdated.id,
-          fullName: TechnicianToBeUpdated.fullName,
-          DNI: TechnicianToBeUpdated.DNI,
-          phone: TechnicianToBeUpdated.phone,
-          address: TechnicianToBeUpdated.address,
-        });
-      } else {
-        history.replace('/technicians');
-      }
+    if (action === 'update') {
+      getTechnicians(technicianId);
     } else {
       handleReset();
     }
   }, [currentTechnician]);
+
+  useEffect(() => {
+    if (technician && action === 'update'){
+      setUpdate(true);
+      setName(currentTechnician.fullName);
+      setDNI(currentTechnician.DNI);
+      setPhone(currentTechnician.phone);
+      setAddress(currentTechnician.address);
+    } else {
+      handleReset();
+    }
+
+
+  }, [technician]);
+      
 
   return (
     <div>
@@ -89,7 +96,7 @@ const TechnicianForm = ({
               <input
                 type="text"
                 placeholder="Add full name"
-                value={fullName}
+                value={fullName || ''}
                 onChange={(e) => setName(e.target.value)}
                 maxLength="20"
                 required
@@ -102,7 +109,7 @@ const TechnicianForm = ({
               <input
                 type="text"
                 placeholder="Add DNI"
-                value={DNI}
+                value={DNI || ''}
                 onChange={(e) => setDNI(e.target.value)}
                 maxLength="8"
                 required
@@ -115,7 +122,7 @@ const TechnicianForm = ({
               <input
                 type="text"
                 placeholder="Add Phone"
-                value={phone}
+                value={phone || ''}
                 onChange={(e) => setPhone(e.target.value)}
                 required
               />
@@ -127,7 +134,7 @@ const TechnicianForm = ({
               <input
                 type="text"
                 placeholder="Add Address"
-                value={address}
+                value={address || ''}
                 onChange={(e) => setAddress(e.target.value)}
                 required
               />
@@ -149,4 +156,18 @@ const TechnicianForm = ({
   );
 };
 
-export default TechnicianForm;
+const mapDispatchToProps = (dispatch) => {
+  return bindActionCreators(
+    {
+      getTechnician: getTechnicianAction,
+    },
+    dispatch
+  );
+};
+
+const mapStateToProps = (state) => ({
+  technician: state.technicians.technician,
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(TechnicianForm);
+
